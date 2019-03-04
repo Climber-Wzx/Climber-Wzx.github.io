@@ -300,17 +300,14 @@ public interface Map&lt;K,V&gt; {
                 k = entry.getKey();
                 v = entry.getValue();
             } catch(IllegalStateException ise) {
-                // this usually means the entry is no longer in the map.
                 throw new ConcurrentModificationException(ise);
             }
 
-            // ise thrown from function is not a cme.
             v = function.apply(k, v);
 
             try {
                 entry.setValue(v);
             } catch(IllegalStateException ise) {
-                // this usually means the entry is no longer in the map.
                 throw new ConcurrentModificationException(ise);
             }
         }
@@ -318,13 +315,6 @@ public interface Map&lt;K,V&gt; {
 
     /**
      * 如果不存在，则添加指定的Key-Value
-     * 等价于
-     * V v = map.get(key);
-     * if (v == null)
-     *     v = map.put(key, value);
-     *
-     * return v;
-     * }
      */
     default V putIfAbsent(K key, V value) {
         V v = get(key);
@@ -336,14 +326,7 @@ public interface Map&lt;K,V&gt; {
     }
 
     /**
-     * 删除指定的Key-Value
-     * 等价于
-     * if (map.containsKey(key) &amp;&amp; Objects.equals(map.get(key), value)) {
-     *     map.remove(key);
-     *     return true;
-     * } else
-     *     return false;
-     * }
+     * 删除指定的Key-Value，如果原先Value和指定的Value不相等，则不删除
      */
     default boolean remove(Object key, Object value) {
         Object curValue = get(key);
@@ -356,7 +339,7 @@ public interface Map&lt;K,V&gt; {
     }
 
     /**
-     * 替换指定Key的Value
+     * 替换指定Key的Value，如果原先的Value和指定的oldValue不相等，则不替换
      */
     default boolean replace(K key, V oldValue, V newValue) {
         Object curValue = get(key);
@@ -369,23 +352,7 @@ public interface Map&lt;K,V&gt; {
     }
 
     /**
-     * Replaces the entry for the specified key only if it is
-     * currently mapped to some value.
-     *
-     * @implSpec
-     * The default implementation is equivalent to, for this {@code map}:
-     *
-     * &lt;pre&gt; {@code
-     * if (map.containsKey(key)) {
-     *     return map.put(key, value);
-     * } else
-     *     return null;
-     * }&lt;/pre&gt;
-     *
-     * The default implementation makes no guarantees about synchronization
-     * or atomicity properties of this method. Any implementation providing
-     * atomicity guarantees must override this method and document its
-     * concurrency properties.
+     * 替换指定Key的Value为指定的Value
      */
     default V replace(K key, V value) {
         V curValue;
@@ -396,48 +363,9 @@ public interface Map&lt;K,V&gt; {
     }
 
     /**
-     * If the specified key is not already associated with a value (or is mapped
-     * to {@code null}), attempts to compute its value using the given mapping
-     * function and enters it into this map unless {@code null}.
-     *
-     * If the function returns {@code null} no mapping is recorded. If
-     * the function itself throws an (unchecked) exception, the
-     * exception is rethrown, and no mapping is recorded.  The most
-     * common usage is to construct a new object serving as an initial
-     * mapped value or memoized result, as in:
-     *
-     * &lt;pre&gt; {@code
-     * map.computeIfAbsent(key, k -&gt; new Value(f(k)));
-     * }&lt;/pre&gt;
-     *
-     * Or to implement a multi-value map, {@code Map&lt;K,Collection&lt;V&gt;&gt;},
-     * supporting multiple values per key:
-     *
-     * &lt;pre&gt; {@code
-     * map.computeIfAbsent(key, k -&gt; new HashSet&lt;V&gt;()).add(v);
-     * }&lt;/pre&gt;
-     *
-     *
-     * @implSpec
-     * The default implementation is equivalent to the following steps for this
-     * {@code map}, then returning the current value or {@code null} if now
-     * absent:
-     *
-     * &lt;pre&gt; {@code
-     * if (map.get(key) == null) {
-     *     V newValue = mappingFunction.apply(key);
-     *     if (newValue != null)
-     *         map.put(key, newValue);
-     * }
-     * }&lt;/pre&gt;
-     *
-     * The default implementation makes no guarantees about synchronization
-     * or atomicity properties of this method. Any implementation providing
-     * atomicity guarantees must override this method and document its
-     * concurrency properties. In particular, all implementations of
-     * subinterface {@link java.util.concurrent.ConcurrentMap} must document
-     * whether the function is applied once atomically only if the value is not
-     * present.
+     * 如果指定的Key没有关联Value，则使用指定的Function计算其Value（非Null）并关联起来
+     * 如果指定的Function计算的Value为空或抛异常，则不进行关联！
+     * 默认实现不保证同步或此方法的原子性属性。任何实现提供原子性保证必须覆盖此方法并记录其
      */
     default V computeIfAbsent(K key, Function&lt;? super K, ? extends V&gt; mappingFunction) {
         Objects.requireNonNull(mappingFunction);
@@ -449,42 +377,12 @@ public interface Map&lt;K,V&gt; {
                 return newValue;
             }
         }
-
         return v;
     }
 
     /**
-     * If the value for the specified key is present and non-null, attempts to
-     * compute a new mapping given the key and its current mapped value.
-     *
-     * If the function returns {@code null}, the mapping is removed.  If the
-     * function itself throws an (unchecked) exception, the exception is
-     * rethrown, and the current mapping is left unchanged.
-    *
-     * @implSpec
-     * The default implementation is equivalent to performing the following
-     * steps for this {@code map}, then returning the current value or
-     * {@code null} if now absent:
-     *
-     * &lt;pre&gt; {@code
-     * if (map.get(key) != null) {
-     *     V oldValue = map.get(key);
-     *     V newValue = remappingFunction.apply(key, oldValue);
-     *     if (newValue != null)
-     *         map.put(key, newValue);
-     *     else
-     *         map.remove(key);
-     * }
-     * }&lt;/pre&gt;
-     *
-     * The default implementation makes no guarantees about synchronization
-     * or atomicity properties of this method. Any implementation providing
-     * atomicity guarantees must override this method and document its
-     * concurrency properties. In particular, all implementations of
-     * subinterface {@link java.util.concurrent.ConcurrentMap} must document
-     * whether the function is applied once atomically only if the value is not
-     * present.
-     *
+     * 如果指定的Key已关联Value，并且指定Function计算其Value为非Null，在替换；
+     * 如果Function计算其Value为Null，则删除该Key
      */
     default V computeIfPresent(K key, BiFunction&lt;? super K, ? super V, ? extends V&gt; remappingFunction) {
         Objects.requireNonNull(remappingFunction);
@@ -504,48 +402,8 @@ public interface Map&lt;K,V&gt; {
     }
 
     /**
-     * Attempts to compute a mapping for the specified key and its current
-     * mapped value (or {@code null} if there is no current mapping). For
-     * example, to either create or append a {@code String} msg to a value
-     * mapping:
-     *
-     * &lt;pre&gt; {@code
-     * map.compute(key, (k, v) -&gt; (v == null) ? msg : v.concat(msg))}&lt;/pre&gt;
-     * (Method {@link #merge merge()} is often simpler to use for such purposes.)
-     *
-     * If the function returns {@code null}, the mapping is removed (or
-     * remains absent if initially absent).  If the function itself throws an
-     * (unchecked) exception, the exception is rethrown, and the current mapping
-     * is left unchanged.
-     *
-     * @implSpec
-     * The default implementation is equivalent to performing the following
-     * steps for this {@code map}, then returning the current value or
-     * {@code null} if absent:
-     *
-     * &lt;pre&gt; {@code
-     * V oldValue = map.get(key);
-     * V newValue = remappingFunction.apply(key, oldValue);
-     * if (oldValue != null ) {
-     *    if (newValue != null)
-     *       map.put(key, newValue);
-     *    else
-     *       map.remove(key);
-     * } else {
-     *    if (newValue != null)
-     *       map.put(key, newValue);
-     *    else
-     *       return null;
-     * }
-     * }&lt;/pre&gt;
-     *
-     * The default implementation makes no guarantees about synchronization
-     * or atomicity properties of this method. Any implementation providing
-     * atomicity guarantees must override this method and document its
-     * concurrency properties. In particular, all implementations of
-     * subinterface {@link java.util.concurrent.ConcurrentMap} must document
-     * whether the function is applied once atomically only if the value is not
-     * present.
+     * 使用Function计算指定Key的Value，如果该Value为Null，并且原先Value不为空，则删除该Key；
+     * 如果计算的Value不为Null，则替换该Key的Value
      */
     default V compute(K key, BiFunction&lt;? super K, ? super V, ? extends V&gt; remappingFunction) {
         Objects.requireNonNull(remappingFunction);
@@ -553,68 +411,27 @@ public interface Map&lt;K,V&gt; {
 
         V newValue = remappingFunction.apply(key, oldValue);
         if (newValue == null) {
-            // delete mapping
             if (oldValue != null || containsKey(key)) {
-                // something to remove
                 remove(key);
                 return null;
             } else {
-                // nothing to do. Leave things as they were.
                 return null;
             }
         } else {
-            // add or replace old mapping
             put(key, newValue);
             return newValue;
         }
     }
 
     /**
-     * If the specified key is not already associated with a value or is
-     * associated with null, associates it with the given non-null value.
-     * Otherwise, replaces the associated value with the results of the given
-     * remapping function, or removes if the result is {@code null}. This
-     * method may be of use when combining multiple mapped values for a key.
-     * For example, to either create or append a {@code String msg} to a
-     * value mapping:
-     *
-     * &lt;pre&gt; {@code
-     * map.merge(key, msg, String::concat)
-     * }&lt;/pre&gt;
-     *
-     * If the function returns {@code null} the mapping is removed.  If the
-     * function itself throws an (unchecked) exception, the exception is
-     * rethrown, and the current mapping is left unchanged.
-     *
-     * @implSpec
-     * The default implementation is equivalent to performing the following
-     * steps for this {@code map}, then returning the current value or
-     * {@code null} if absent:
-     *
-     * &lt;pre&gt; {@code
-     * V oldValue = map.get(key);
-     * V newValue = (oldValue == null) ? value :
-     *              remappingFunction.apply(oldValue, value);
-     * if (newValue == null)
-     *     map.remove(key);
-     * else
-     *     map.put(key, newValue);
-     * }&lt;/pre&gt;
-     *
-     * The default implementation makes no guarantees about synchronization
-     * or atomicity properties of this method. Any implementation providing
-     * atomicity guarantees must override this method and document its
-     * concurrency properties. In particular, all implementations of
-     * subinterface {@link java.util.concurrent.ConcurrentMap} must document
-     * whether the function is applied once atomically only if the value is not
-     * present.
+     * 合并指定Key的Value，如果原先Value为空，则使用指定的Value，否则计算新的Value。
+     * 如果新的Value为空，则删除Key；否则将Key的Value替换为新的Value
      */
     default V merge(K key, V value, BiFunction&lt;? super V, ? super V, ? extends V&gt; remappingFunction) {
         Objects.requireNonNull(remappingFunction);
         Objects.requireNonNull(value);
         V oldValue = get(key);
-        V newValue = (oldValue == null) ? value :
-                   remappingFunction.apply(oldValue, value);
+        V newValue = (oldValue == null) ? value : remappingFunction.apply(oldValue, value);
         if(newValue == null) {
             remove(key);
         } else {
