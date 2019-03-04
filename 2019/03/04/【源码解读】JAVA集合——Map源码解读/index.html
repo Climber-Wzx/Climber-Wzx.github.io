@@ -19,7 +19,7 @@
     <meta name="description" content>
     <meta name="author" content="WZX">
     <meta name="keywords" content>
-    <title>【源码解读】JAVA集合——Map源码解读 ~ Climber-Wzx</title>
+    <title>【源码解读】JAVA集合——Map接口 ~ Climber-Wzx</title>
     <link rel="stylesheet" href="/css/Material_Icons.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
     <link rel="stylesheet" href="/css/main.css">
@@ -84,7 +84,7 @@
   <div class="page-header header-filter" data-parallax="false" style="background-image: url('/img/post-banner.jpg'); height: 70vh;">
     
       <div class="container">
-        <h1 class="title text-center post_title">【源码解读】JAVA集合——Map源码解读</h1>
+        <h1 class="title text-center post_title">【源码解读】JAVA集合——Map接口</h1>
         <p class="text-center"><b>Monday, March 4th 2019, 4:45 pm</b></p>
       </div>
     
@@ -99,7 +99,17 @@
       <div class="container">
         <div class="section">
           <div class="post_content">
-              
+              <p>在Java集合框架中，Map集合是用于存放Key-Value的容器。其中，Key是不能重复的并且每个Key最多只能映射一个Value。</p>
+<p>Map接口提供了三种视图：</p>
+<ul>
+<li><p>Key的Set集合；</p>
+</li>
+<li><p>Value的Collection集合；</p>
+</li>
+<li><p>Key-Value映射集合（Set&lt;Map.Entry&lt;K, V&gt;&gt;）；</p>
+</li>
+</ul>
+
           </div>
           <br><br>
           <div>
