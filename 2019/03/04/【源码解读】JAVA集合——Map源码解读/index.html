@@ -112,8 +112,8 @@
 <p>Map接口的不同实现类对Key和Value的限制也有不同：有些禁止Key和Value为Null；有些限制Key类型。添加不合法的Key或Value将抛出NullPointerException或者ClassCastException异常！</p>
 <p>Map接口的不同实现类对于元素顺序是由其对应的Iterator（迭代器）所返回的顺序来决定：有些Map接口实现类能够保证元素的顺序（如TreeMap）；有些不能保证（如HashMap）。</p>
 <p><strong>注意：</strong></p>
-<!--1）Map接口包含了“破坏性”方法。也就是说，这些方法修改了Map结构（如键值对个数、重哈希等）。如果具体Map实现类不支持这些操作，则抛出UnsupportedOperationException；如果对Map没有影响（如putAll(Map)），则不是必须的。-->
-<!--2）如果Key是可变对象，则必须非常小心。如果修改Key的对象值会影响到对象的比较操作，则不应指定Map的行为。例如：不能将Map自身映射为自己的Key。虽然Map可以将自身作为自己的一个Value，但我们还是要特别小心：equals和hashCode方法不能在这样的映射上很好地定义。-->
+<p>1）Map接口包含了“破坏性”方法。也就是说，这些方法修改了Map结构（如键值对个数、重哈希等）。如果具体Map实现类不支持这些操作，则抛出UnsupportedOperationException；如果对Map没有影响（如putAll(Map)），则不是必须的。</p>
+<p>2）如果Key是可变对象，则必须非常小心。如果修改Key的对象值会影响到对象的比较操作，则不应指定Map的行为。例如：不能将Map自身映射为自己的Key。虽然Map可以将自身作为自己的一个Value，但我们还是要特别小心：equals和hashCode方法不能在这样的映射上很好地定义。</p>
 <pre><code>package java.util;
 
 import java.util.function.BiConsumer;
@@ -121,19 +121,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.io.Serializable;
 
-/**
- * Map集合是用于映射Key-Value
- * 不能包含重复的Key，每个Key最多只能映射一个Value。 
- * Map接口提供了三种集合视图：Key的Set集合、Value集合、Key-Value映射。
- * 
- * Map的顺序定义为Map所对应的迭代器所返回的元素顺序。有些Map实现类，例如TreeMap能保证元素的顺序，但HashMap不能保证。
- *
- * 有些Map的实现类对其所包含的Key和Value有限制：有些禁止Key和Value为Null，有些限制Key类型。添加不合法的Key或Value将抛出NullPointerException 或者 ClassCastException异常！
- * 该接口包含了“破坏性”方法。也就是说，这些方法修改了Map，如果Map不支持这些操作，则抛出UnsupportedOperationException；如果对Map没有影响，则不是必须的。例如：putAll(Map)
- *
- * 注意：如果使用可变对象作为Key，则必须非常小心。如果Map中Key的对象的值被修改而影响到对象的比较操作，则不应指定Map的行为。如不能将自身Map映射为自身的Key.
- *          虽然Map可以包含自己作为一个Value，但我们还是要特别小心：equals和hashCode方法不再在这样的映射上定义良好。
- */
 public interface Map&lt;K,V&gt; {
     // 查询操作
     /**
