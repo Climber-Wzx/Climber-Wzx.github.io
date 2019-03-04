@@ -122,7 +122,7 @@ import java.util.function.Function;
 import java.io.Serializable;
 
 public interface Map&lt;K,V&gt; {
-    // 查询操作
+    // ---------------------- 查询操作 ----------------------
     /**
      * 返回Map的Key-Value的数量
      */
@@ -149,7 +149,7 @@ public interface Map&lt;K,V&gt; {
     V get(Object key);
 
 
-    // 修改操作
+    // ---------------------- 修改操作 ----------------------
     /**
      * 将指定的Value关联到Map中指定的Key
      * 如果已存在该Key，则替换该Key的Value
@@ -174,8 +174,18 @@ public interface Map&lt;K,V&gt; {
      */
     void clear();
 
+    // ---------------------- 比较和哈希 ----------------------
+    /**
+     * 比较Map对象是否相等：m1.entrySet().equals(m2.entrySet())
+     */
+    boolean equals(Object o);
 
-    // 视图
+    /**
+     * 返回Map的哈希值：如果m1.equals(m2)，则m1.hashCode()==m2.hashCode()
+     */
+    int hashCode();
+
+    // ---------------------- 视图 ----------------------
     /**
      * 返回该Map的Key Set集合
      * 注意：由于该Set集合由Map提供支持，所以Map的Key修改将反射到Set集合中的元素。
@@ -247,19 +257,7 @@ public interface Map&lt;K,V&gt; {
         }
     }
 
-    // 比较和哈希
-    /**
-     * 比较Map对象是否相等：m1.entrySet().equals(m2.entrySet())
-     */
-    boolean equals(Object o);
-
-    /**
-     * 返回Map的哈希值：如果m1.equals(m2)，则m1.hashCode()==m2.hashCode()
-     */
-    int hashCode();
-
-
-    // 默认方法
+    // ---------------------- 默认方法 ----------------------
     /**
      * 获取指定Key的Value，如果为空，则为指定的默认值
      */
@@ -274,8 +272,7 @@ public interface Map&lt;K,V&gt; {
     default void forEach(BiConsumer&lt;? super K, ? super V&gt; action) {
         Objects.requireNonNull(action);
         for (Map.Entry&lt;K, V&gt; entry : entrySet()) {
-            K k;
-            V v;
+            K k; V v;
             try {
                 k = entry.getKey();
                 v = entry.getValue();
